@@ -24,6 +24,22 @@ else()
     set(SDK ${xbe_sdk_SOURCE_DIR})
 endif()
 
+# VAProbe: -DBLACK_VAPROBE=ON replaces the game host with the memory probe
+if(BLACK_VAPROBE)
+    set(SDL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/SDL)
+    set(SDL_SHARED ON CACHE BOOL "" FORCE)
+    set(SDL_STATIC OFF CACHE BOOL "" FORCE)
+    set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
+    set(SDL_RENDER OFF CACHE BOOL "" FORCE)
+    set(SDL_GPU OFF CACHE BOOL "" FORCE)
+    set(SDL_CAMERA OFF CACHE BOOL "" FORCE)
+    add_subdirectory(${SDL_DIR} ${CMAKE_CURRENT_BINARY_DIR}/SDL EXCLUDE_FROM_ALL)
+    add_library(main SHARED native/vaprobe/main.cpp)
+    target_include_directories(main PRIVATE ${SDL_DIR}/include)
+    target_link_libraries(main PRIVATE SDL3::SDL3-shared log android)
+    return()
+endif()
+
 # the recompiled code and the xbe it came from
 set(XBE_GENERATED ${REPO}/generated/game CACHE PATH "the recompiled code of default.xbe")
 set(XBE_IMAGE ${REPO}/assets/default.xbe CACHE FILEPATH "the xbe it was recompiled from")

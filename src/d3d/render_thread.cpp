@@ -5,6 +5,19 @@
 #include <arm_neon.h>
 #include <pthread.h>
 
+
+#if defined(__arm__) && !defined(__aarch64__)
+// ARMv7 NEON has no horizontal vmaxvq_u8 (an AArch64 intrinsic): fold the vector down pairwise instead.
+static inline uint8_t vmaxvq_u8_v7(uint8x16_t v) {
+    uint8x8_t m = vmax_u8(vget_low_u8(v), vget_high_u8(v));
+    m = vpmax_u8(m, m);
+    m = vpmax_u8(m, m);
+    m = vpmax_u8(m, m);
+    return vget_lane_u8(m, 0);
+}
+#define vmaxvq_u8 vmaxvq_u8_v7
+#endif
+
 #include <algorithm>
 #include <chrono>
 #include <condition_variable>
